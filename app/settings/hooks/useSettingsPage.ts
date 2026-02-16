@@ -19,14 +19,6 @@ export function useSettingsPage() {
     const [isRestoreDefaultsDialogOpen, setIsRestoreDefaultsDialogOpen] = useState(false);
     const [editingSource, setEditingSource] = useState<VideoSource | null>(null);
 
-    const [passwordAccess, setPasswordAccess] = useState(false);
-    const [accessPasswords, setAccessPasswords] = useState<string[]>([]);
-    const [envPasswordSet, setEnvPasswordSet] = useState(false);
-
-    const [settingsPasswordEnabled, setSettingsPasswordEnabled] = useState(false);
-    const [settingsPasswords, setSettingsPasswords] = useState<string[]>([]);
-    const [envSettingsPasswordSet, setEnvSettingsPasswordSet] = useState(false);
-
     // Display settings
     const [realtimeLatency, setRealtimeLatency] = useState(false);
     const [searchDisplayMode, setSearchDisplayMode] = useState<SearchDisplayMode>('normal');
@@ -39,27 +31,11 @@ export function useSettingsPage() {
         setSources(settings.sources || []);
         setSubscriptions(settings.subscriptions || []);
         setSortBy(settings.sortBy);
-        setPasswordAccess(settings.passwordAccess);
-        setAccessPasswords(settings.accessPasswords);
-        setSettingsPasswordEnabled(settings.settingsPasswordEnabled);
-        setSettingsPasswords(settings.settingsPasswords);
         setRealtimeLatency(settings.realtimeLatency);
         setSearchDisplayMode(settings.searchDisplayMode);
         setFullscreenType(settings.fullscreenType);
         setProxyMode(settings.proxyMode);
         setRememberScrollPosition(settings.rememberScrollPosition);
-
-        // Fetch env password status
-        fetch('/api/config')
-            .then(res => res.json())
-            .then(data => {
-                setEnvPasswordSet(data.hasEnvPassword);
-                setEnvSettingsPasswordSet(data.hasEnvSettingsPassword);
-            })
-            .catch(() => {
-                setEnvPasswordSet(false);
-                setEnvSettingsPasswordSet(false);
-            });
     }, []);
 
     const handleSourcesChange = (newSources: VideoSource[]) => {
@@ -70,10 +46,6 @@ export function useSettingsPage() {
             sources: newSources,
             sortBy,
             subscriptions,
-            searchHistory: true,
-            watchHistory: true,
-            passwordAccess,
-            accessPasswords
         });
     };
 
@@ -98,85 +70,6 @@ export function useSettingsPage() {
             ...currentSettings,
             sources,
             sortBy: newSort,
-            searchHistory: true,
-            watchHistory: true,
-            passwordAccess,
-            accessPasswords
-        });
-    };
-
-    const handlePasswordToggle = (enabled: boolean) => {
-        setPasswordAccess(enabled);
-        const currentSettings = settingsStore.getSettings();
-        settingsStore.saveSettings({
-            ...currentSettings,
-            sources,
-            sortBy,
-            searchHistory: true,
-            watchHistory: true,
-            passwordAccess: enabled,
-            accessPasswords
-        });
-    };
-
-    const handleAddPassword = (password: string) => {
-        const updated = [...accessPasswords, password];
-        setAccessPasswords(updated);
-        const currentSettings = settingsStore.getSettings();
-        settingsStore.saveSettings({
-            ...currentSettings,
-            sources,
-            sortBy,
-            searchHistory: true,
-            watchHistory: true,
-            passwordAccess,
-            accessPasswords: updated
-        });
-    };
-
-    const handleRemovePassword = (password: string) => {
-        const updated = accessPasswords.filter(p => p !== password);
-        setAccessPasswords(updated);
-        const currentSettings = settingsStore.getSettings();
-        settingsStore.saveSettings({
-            ...currentSettings,
-            sources,
-            sortBy,
-            searchHistory: true,
-            watchHistory: true,
-            passwordAccess,
-            accessPasswords: updated
-        });
-    };
-
-    const handleSettingsPasswordToggle = (enabled: boolean) => {
-        setSettingsPasswordEnabled(enabled);
-        const currentSettings = settingsStore.getSettings();
-        settingsStore.saveSettings({
-            ...currentSettings,
-            settingsPasswordEnabled: enabled,
-        });
-    };
-
-    const handleAddSettingsPassword = (password: string) => {
-        const updated = [...settingsPasswords, password];
-        setSettingsPasswords(updated);
-        const currentSettings = settingsStore.getSettings();
-        settingsStore.saveSettings({
-            ...currentSettings,
-            settingsPasswordEnabled,
-            settingsPasswords: updated,
-        });
-    };
-
-    const handleRemoveSettingsPassword = (password: string) => {
-        const updated = settingsPasswords.filter(p => p !== password);
-        setSettingsPasswords(updated);
-        const currentSettings = settingsStore.getSettings();
-        settingsStore.saveSettings({
-            ...currentSettings,
-            settingsPasswordEnabled,
-            settingsPasswords: updated,
         });
     };
 
@@ -199,8 +92,6 @@ export function useSettingsPage() {
             setSources(settings.sources);
             setSortBy(settings.sortBy);
             setSubscriptions(settings.subscriptions || []);
-            setPasswordAccess(settings.passwordAccess);
-            setAccessPasswords(settings.accessPasswords);
 
             // Reload to apply changes
             setTimeout(() => window.location.reload(), 1000);
@@ -371,12 +262,6 @@ export function useSettingsPage() {
         sources,
         subscriptions,
         sortBy,
-        passwordAccess,
-        accessPasswords,
-        envPasswordSet,
-        settingsPasswordEnabled,
-        settingsPasswords,
-        envSettingsPasswordSet,
         realtimeLatency,
         searchDisplayMode,
         isAddModalOpen,
@@ -393,18 +278,12 @@ export function useSettingsPage() {
         handleSourcesChange,
         handleAddSource,
         handleSortChange,
-        handlePasswordToggle,
-        handleAddPassword,
-        handleRemovePassword,
-        handleSettingsPasswordToggle,
-        handleAddSettingsPassword,
-        handleRemoveSettingsPassword,
         handleExport,
-        handleImportFile, // Renamed from handleImport
-        handleImportLink, // New
-        handleAddSubscription, // New
-        handleRemoveSubscription, // New
-        handleRefreshSubscription, // New
+        handleImportFile,
+        handleImportLink,
+        handleAddSubscription,
+        handleRemoveSubscription,
+        handleRefreshSubscription,
         handleRestoreDefaults,
         handleResetAll,
         editingSource,
